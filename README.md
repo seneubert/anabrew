@@ -14,7 +14,7 @@ for i in range(0,4) :
                         outputs=["ps%i.root" % i],
                         command='root -l -b -q scripts/ps.C\\(\\"ps%i.root\\",12345\\)' % i))
     
-step2=Recipe(inputs=["ps%i.root"%i for i in range(0,4)], # get this from step1
+step2=Recipe(inputs=["ps%i.root"%i for i in range(0,4)], 
              tools=[],
              outputs=["ntuple.root"],
              command='hadd -f ntuple.root ps*.root')
