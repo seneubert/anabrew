@@ -19,16 +19,16 @@ class Recipe :
 
     def __init__(self, **kwargs):
         self.__dict__ = kwargs
-        self.inputs = []
-        if "inputs" in kwargs.keys() : 
-            try:
-                self.inputs.extend(kwargs["inputs"])
-            except TypeError:
-                self.inputs.append(kwargs["inputs"])
+       # self.inputs = []
+       # if "inputs" in kwargs.keys() : 
+       #     try:
+       #         self.inputs.extend(kwargs["inputs"])
+       #     except TypeError:
+       #         self.inputs.append(kwargs["inputs"])
                 
         # split command into app and args        
-        self.com=self.command.split(' ',2)
-        if len(self.com)==1 : self.com.append("")        
+        com=self.command.partition(' ')
+        self.cmd=[com[0],com[1]+com[2]]
         # add to the list of recipes
         Recipe.recipes.append(self)
 
@@ -46,17 +46,23 @@ class Recipe :
         it={}
         for i in self.inputs :
             # no - is there a recipe to brew them?
-            if not os.path.isfile(i) :
-                for r in recipes :
-                    if i in r.outputs :
-                        #     yes - brew that recipe
-                        r.brew()
-                        break; # stop looping over recipes
+            print "... checking for "+ i
+            foundRecipe = False
+            for r in Recipe.recipes :
+                if i in r.outputs :
+                    #     yes - brew that recipe
+                    foundRecipe=True
+                    r.brew()
+                    break; # stop looping over recipes
+            
+            if not foundRecipe :
+                print "No recipe to brew " + i
+                exit(1)
             # check if the input is now there
             if not os.path.isfile(i) :
                 print "Failed to brew target " + i
-                exit;
-            #      no - abort with error
+                exit(2)
+            
             # yes - what is their timestamp?
             it[i] = os.path.getmtime(i)
 
@@ -94,8 +100,9 @@ class Recipe :
         # yes - nothing to do
         # no - try to brew
         if itmax >= otmin :
-            print "Executing " + self.command
-            subprocess.call(self.com);
+            print "Executing " + self.cmd[0] +"\n" + "with options " + self.cmd[1]
+            # would like not to use shell=True but then ROOT does not work :(
+            subprocess.call(self.cmd[0]+self.cmd[1], shell=True);
 
         # if recipe is deferred (remote job)
         # set status to running in database
