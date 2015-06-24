@@ -20,7 +20,7 @@ step2=Recipe(inputs=["ps%i.root"%i for i in range(0,4)],
              command='hadd -f ntuple.root ps*.root')
 
 step3=Recipe(inputs=["ntuple.root"],
-             tools=[],
+             tools=["scripts/plot.C"],
              outputs=["plots.root"],
              command='root -l -b -q scripts/plot.C\\(\\"ntuple.root\\",\\"plots.root\\"\\)')
 
