@@ -3,6 +3,32 @@ Basic pipelining of data analysis tasks.
 
 Goal: build a pipeline for LHCb data analyses supporting delayed jobs (grid)
 
+Steps in the analysis are described by `recipes` that take `inputs`, operate on them with `tools` and return `outputs`. `inputs` and `outputs` are files on disk. anabrew aims at reducing boilerplate code in the pipline definition to a minimum, while providing the full flexibility of python to define the workflow as shown in this example:
+```
+from anabrew import Recipe
+
+step1 = []
+for i in range(0,4) :
+    step1.append(Recipe(inputs=[],
+                        tools=["scripts/ps.C"],
+                        outputs=["ps%i.root" % i],
+                        command='root -l -b -q scripts/ps.C\\(\\"ps%i.root\\",12345\\)' % i))
+    
+step2=Recipe(inputs=["ps%i.root"%i for i in range(0,4)], # get this from step1
+             tools=[],
+             outputs=["ntuple.root"],
+             command='hadd -f ntuple.root ps*.root')
+
+step3=Recipe(inputs=["ntuple.root"],
+             tools=[],
+             outputs=["plots.root"],
+             command='root -l -b -q scripts/plot.C\\(\\"ntuple.root\\",\\"plots.root\\"\\)')
+
+step3.brew()
+
+``` 
+
+
 ## Quick start
 
 This demo runs a small phasespace simulation, divided into 5 jobs; It 
