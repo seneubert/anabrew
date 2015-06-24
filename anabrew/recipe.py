@@ -42,11 +42,10 @@ class Recipe :
     
         # DO WE HAVE TO BREW?
         # do the inputs exist?
-        print "Checking inputs ..."
         it={}
         for i in self.inputs :
             # no - is there a recipe to brew them?
-            print "... checking for "+ i
+            print "Checking ingredient "+ i
             foundRecipe = False
             for r in Recipe.recipes :
                 if i in r.outputs :
