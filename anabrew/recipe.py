@@ -66,12 +66,21 @@ class Recipe :
             it[i] = os.path.getmtime(i)
 
         # do the tools exist?
-        # no - abort with error message
-        # yes - what is their timestamp?
+        tooltimes = {}
+        for t in self.tools :
+            if not os.path.isfile(t) :
+                # no - abort with error message
+                print "Missing tool " + t
+                print "Aborting."
+                exit(3)
+            else :
+                # yes - what is their timestamp?
+                tooltimes[t]=os.path.getmtime(t) 
+
 
         # do the outputs exist?
         # yes - what is their timestamp?
-        ot = {}
+        outputtimes = {}
         for o in self.outputs :
             try : 
                 t=os.path.getmtime(o) 
@@ -80,7 +89,7 @@ class Recipe :
             except os.error:
                 t=0
                 
-            ot[o]=t;
+            outputtimes[o]=t;
 
         #print ot
         # no - are they already brewing?
@@ -90,11 +99,11 @@ class Recipe :
         # compare timestamps
         # are outputs younger than inputs and tools?
         try :
-            itmax=max(it.values())
+            itmax=max(it.values() + tooltimes.values() )
         except ValueError : 
             itmax=0
 
-        otmin=min(ot.values())
+        otmin=min(outputtimes.values())
         
         # yes - nothing to do
         # no - try to brew
