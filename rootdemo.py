@@ -8,7 +8,7 @@ for i in range(0,4) :
                         tools=["scripts/ps.C"],
                         outputs=["ps%i.root" % i],
                         command='root -l -b -q scripts/ps.C\\(\\"ps%i.root\\",12345\\)' % i))
-    
+
 step2=Recipe(inputs=["ps%i.root"%i for i in range(0,4)], # get this from step1
              tools=[],
              outputs=["ntuple.root"],
