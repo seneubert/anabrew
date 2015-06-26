@@ -1,10 +1,10 @@
 # anabrew
-Basic pipelining of data analysis tasks. 
+Basic pipelining of data analysis tasks.
 
 Goal: build a pipeline for LHCb data analyses supporting delayed jobs (grid)
 
 Steps in the analysis are described by `recipes` that take `inputs`, operate on them with `tools` and return `outputs`. `inputs` and `outputs` are files on disk. anabrew aims at reducing boilerplate code in the pipline definition to a minimum, while providing the full flexibility of python to define the workflow as shown in this example:
-```
+````python
 from anabrew import Recipe
 
 step1 = []
@@ -13,8 +13,8 @@ for i in range(0,4) :
                         tools=["scripts/ps.C"],
                         outputs=["ps%i.root" % i],
                         command='root -l -b -q scripts/ps.C\\(\\"ps%i.root\\",12345\\)' % i))
-    
-step2=Recipe(inputs=["ps%i.root"%i for i in range(0,4)], 
+
+step2=Recipe(inputs=["ps%i.root"%i for i in range(0,4)],
              tools=[],
              outputs=["ntuple.root"],
              command='hadd -f ntuple.root ps*.root')
@@ -26,13 +26,13 @@ step3=Recipe(inputs=["ntuple.root"],
 
 step3.brew()
 
-``` 
+````
 
 
 ## Quick start
 
-This demo runs a small phasespace simulation, divided into 5 jobs; It 
-h-adds the output into an ntuple and finally produces a plot from the ntuple. 
+This demo runs a small phasespace simulation, divided into 5 jobs; It
+h-adds the output into an ntuple and finally produces a plot from the ntuple.
 
 Make sure you have [ROOT](http://root.cern.ch) installed.
 
@@ -43,5 +43,25 @@ git clone https://github.com/seneubert/anabrew.git .
 
 Run the example script
 ````bash
-python root_example.py 
+python rootdemo.py
+````
+
+anabrew supports delayed targets. Have a look at `delayeddemo.py`:
+````python
+from anabrew import Recipe
+from datetime import timedelta
+
+step1delayed = Recipe(inputs=[],
+                        tools=['scripts/delayed.sh'],
+                        outputs=['del.txt'],
+                        command='scripts/delayed.sh del.txt &')
+
+step2 = Recipe(inputs=['del.txt'],
+                tools=[],
+                outputs=['delcopy.txt'],
+                command='cp del.txt delcopy.txt',
+                timeout=timedelta(seconds=40),
+                dtpoll=timedelta(seconds=5))
+
+step2.brew()
 ````
